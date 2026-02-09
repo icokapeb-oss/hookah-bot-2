@@ -1,3 +1,37 @@
+# hookah_bot.py - с Flask для Railway
+import os
+import threading
+import time
+from flask import Flask, jsonify
+from datetime import datetime
+
+print("=" * 60)
+print("🤖 HOOKAH BOT - Railway Version")
+print("=" * 60)
+
+# Flask сервер для healthcheck
+app = Flask(__name__)
+
+@app.route('/health')
+def health():
+    return jsonify({"status": "healthy", "service": "hookah-bot"}), 200
+
+@app.route('/')
+def home():
+    return "Hookah Bot is running!"
+
+def run_flask():
+    print("Starting Flask on port 8080...")
+    app.run(host='0.0.0.0', port=8080, debug=False, use_reloader=False)
+
+# Запускаем Flask
+flask_thread = threading.Thread(target=run_flask, daemon=True)
+flask_thread.start()
+time.sleep(3)
+print("✅ Flask started for healthcheck")
+
+# ====== ВАШ ОСНОВНОЙ КОД НИЖЕ ======
+# ... весь ваш существующий код hookah_bot.py ...
 # bot.py - Railway рабочий вариант
 import os
 import sys
@@ -279,3 +313,4 @@ if __name__ == '__main__':
         level=logging.INFO
     )
     main()
+
