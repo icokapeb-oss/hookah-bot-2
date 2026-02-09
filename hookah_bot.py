@@ -1,3 +1,21 @@
+import sys
+import time
+
+# Принудительный вывод
+sys.stdout.flush()
+sys.stderr.flush()
+
+print("=" * 70, flush=True)
+print("🚀 БОТ НАЧИНАЕТ РАБОТАТЬ!", flush=True)
+print("=" * 70, flush=True)
+
+# Ждем и выводим
+time.sleep(1)
+print("Жду 1 секунду...", flush=True)
+time.sleep(1)
+print("Еще 1 секунда...", flush=True)
+
+# ... ваш код дальше
 # hookah_bot.py - с Flask для Railway
 import os
 import threading
@@ -313,4 +331,5 @@ if __name__ == '__main__':
         level=logging.INFO
     )
     main()
+
 
