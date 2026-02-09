@@ -4,9 +4,10 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "python test_bot.py",
+    "startCommand": "hookah_bot.py",
     "restartPolicyType": "ON_FAILURE",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 30
   }
 }
+
