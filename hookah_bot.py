@@ -1,193 +1,97 @@
-import sys
-import time
-
-# Принудительный вывод
-sys.stdout.flush()
-sys.stderr.flush()
-
-print("=" * 70, flush=True)
-print("🚀 БОТ НАЧИНАЕТ РАБОТАТЬ!", flush=True)
-print("=" * 70, flush=True)
-
-# Ждем и выводим
-time.sleep(1)
-print("Жду 1 секунду...", flush=True)
-time.sleep(1)
-print("Еще 1 секунда...", flush=True)
-
-# ... ваш код дальше
-# hookah_bot.py - с Flask для Railway
-import os
-import threading
-import time
-from flask import Flask, jsonify
-from datetime import datetime
-
-print("=" * 60)
-print("🤖 HOOKAH BOT - Railway Version")
-print("=" * 60)
-
-# Flask сервер для healthcheck
-app = Flask(__name__)
-
-@app.route('/health')
-def health():
-    return jsonify({"status": "healthy", "service": "hookah-bot"}), 200
-
-@app.route('/')
-def home():
-    return "Hookah Bot is running!"
-
-def run_flask():
-    print("Starting Flask on port 8080...")
-    app.run(host='0.0.0.0', port=8080, debug=False, use_reloader=False)
-
-# Запускаем Flask
-flask_thread = threading.Thread(target=run_flask, daemon=True)
-flask_thread.start()
-time.sleep(3)
-print("✅ Flask started for healthcheck")
-
-# ====== ВАШ ОСНОВНОЙ КОД НИЖЕ ======
-# ... весь ваш существующий код hookah_bot.py ...
-# bot.py - Railway рабочий вариант
+# hookah_bot.py - ФИНАЛЬНАЯ РАБОЧАЯ ВЕРСИЯ
 import os
 import sys
+import time
 import json
 import logging
-import threading
-import time
 from datetime import datetime
 
 print("=" * 70)
-print("🚀 ЗАПУСК БОТА НА RAILWAY - ВЕРСИЯ 2.0")
-print("=" * 70)
-print(f"Время: {datetime.now()}")
-print(f"Python: {sys.version}")
-print(f"Директория: {os.getcwd()}")
-print("Список файлов:", os.listdir('.'))
-
-# ====== 1. СНАЧАЛА FLASK ======
-print("\n" + "=" * 70)
-print("1. ЗАПУСКАЮ FLASK ДЛЯ HEALTHCHECK")
+print("🤖 HOOKAH BOT - FINAL VERSION")
 print("=" * 70)
 
+# ====== 1. FLASK ДЛЯ HEALTHCHECK (ТОЛЬКО ЕСЛИ НЕ ЗАПУЩЕН) ======
 try:
-    from flask import Flask, jsonify
-    
-    app = Flask(__name__)
-    
-    @app.route('/')
-    def home():
-        return """
-        <html>
-        <body style="font-family: Arial; text-align: center; padding: 50px;">
-            <h1>🤖 Hookah Taste Bot</h1>
-            <p>Status: <span style="color: green;">🟢 RUNNING</span></p>
-            <p>Telegram bot for tracking hookah flavors</p>
-        </body>
-        </html>
-        """
-    
-    @app.route('/health')
-    def health():
-        return jsonify({
-            "status": "healthy",
-            "service": "telegram-bot",
-            "timestamp": datetime.now().isoformat(),
-            "version": "2.0"
-        }), 200
-    
-    @app.route('/ping')
-    def ping():
-        return "pong", 200
-    
-    # Функция запуска Flask
-    def run_flask():
-        print("🌐 Flask запускается на порту 8080...")
-        # Важно: use_reloader=False для Railway
-        app.run(
-            host='0.0.0.0',
-            port=8080,
-            debug=False,
-            use_reloader=False,
-            threaded=True
-        )
-    
-    # Запускаем Flask в ОСНОВНОМ потоке и ждем
-    print("Запускаю Flask в отдельном потоке...")
-    flask_thread = threading.Thread(target=run_flask)
-    flask_thread.daemon = True
-    flask_thread.start()
-    
-    # ЖДЕМ пока Flask запустится
-    print("Жду 3 секунды для запуска Flask...")
-    time.sleep(3)
-    print("✅ Flask должен быть запущен")
-    
-    # Проверяем порт
+    # Проверяем не запущен ли уже Flask
     import socket
-    try:
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.settimeout(2)
-        result = sock.connect_ex(('127.0.0.1', 8080))
-        if result == 0:
-            print("✅ Порт 8080 открыт - Flask работает!")
-        else:
-            print("⚠️  Порт 8080 не отвечает")
-        sock.close()
-    except Exception as e:
-        print(f"⚠️  Ошибка проверки порта: {e}")
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    result = sock.connect_ex(('127.0.0.1', 8080))
+    sock.close()
     
+    if result != 0:  # Порт свободен
+        from flask import Flask, jsonify
+        import threading
+        
+        app = Flask(__name__)
+        
+        @app.route('/health')
+        def health():
+            return jsonify({"status": "healthy"}), 200
+        
+        @app.route('/')
+        def home():
+            return "Hookah Bot Running"
+        
+        def run_flask():
+            print("🌐 Starting Flask on port 8080...")
+            app.run(host='0.0.0.0', port=8080, debug=False, use_reloader=False)
+        
+        flask_thread = threading.Thread(target=run_flask, daemon=True)
+        flask_thread.start()
+        time.sleep(2)
+        print("✅ Flask started for Railway healthcheck")
+    else:
+        print("✅ Flask already running (port 8080 busy)")
+        
 except Exception as e:
-    print(f"❌ Ошибка Flask: {e}")
-    import traceback
-    traceback.print_exc()
+    print(f"⚠️ Flask issue: {e}")
 
 # ====== 2. ПРОВЕРКА ТОКЕНА ======
 print("\n" + "=" * 70)
-print("2. ПРОВЕРКА ТОКЕНА TELEGRAM")
+print("🔑 CHECKING TELEGRAM TOKEN")
 print("=" * 70)
 
 TOKEN = os.getenv("TELEGRAM_TOKEN")
 if not TOKEN:
-    print("❌ КРИТИЧЕСКАЯ ОШИБКА: TELEGRAM_TOKEN не найден!")
-    print("Переменные окружения:", list(os.environ.keys()))
-    print("\n💡 РЕШЕНИЕ:")
-    print("1. В Railway откройте Settings → Variables")
-    print("2. Добавьте переменную: TELEGRAM_TOKEN = ваш_токен")
-    print("3. Перезапустите проект")
+    print("❌ CRITICAL ERROR: TELEGRAM_TOKEN NOT FOUND!")
+    print("Please add it in Railway: Settings → Variables")
+    print("Name: TELEGRAM_TOKEN")
+    print("Value: your_bot_token_from_BotFather")
+    print("\nCurrent environment variables:")
+    for key in sorted(os.environ.keys()):
+        if 'TOKEN' in key or 'SECRET' in key:
+            print(f"  {key}: [HIDDEN]")
+        else:
+            print(f"  {key}: {os.environ[key][:50]}...")
     
-    # Ждем чтобы увидеть ошибку в логах
-    print("\n⏳ Жду 60 секунд перед завершением...")
-    time.sleep(60)
-    sys.exit(1)
+    # Flask уже работает для healthcheck, так что не завершаем
+    print("\n⏳ Waiting indefinitely... Flask healthcheck is working")
+    print("   Add TELEGRAM_TOKEN to start the Telegram bot")
+    while True:
+        time.sleep(60)  # Ждем вечно
+    
+print(f"✅ Token found: {TOKEN[:10]}...")
+print(f"   Token length: {len(TOKEN)} characters")
 
-print(f"✅ Токен найден: {TOKEN[:10]}...")
-print(f"Длина токена: {len(TOKEN)} символов")
-
-# ====== 3. ЗАГРУЗКА БИБЛИОТЕК TELEGRAM ======
+# ====== 3. ЗАГРУЗКА TELEGRAM БИБЛИОТЕК ======
 print("\n" + "=" * 70)
-print("3. ЗАГРУЗКА TELEGRAM БИБЛИОТЕК")
+print("📚 LOADING TELEGRAM LIBRARIES")
 print("=" * 70)
 
 try:
     from telegram import Update, ReplyKeyboardMarkup
     from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-    print("✅ Telegram библиотеки загружены")
+    print("✅ Telegram libraries imported")
 except ImportError as e:
-    print(f"❌ Ошибка импорта Telegram: {e}")
-    print("Пытаюсь установить...")
-    import subprocess
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "python-telegram-bot==20.7"])
-    from telegram import Update, ReplyKeyboardMarkup
-    from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+    print(f"❌ Import error: {e}")
+    sys.exit(1)
 
-# ====== 4. ВАШИ ФУНКЦИИ БОТА ======
+# ====== 4. ВАШ КОД БОТА (вставьте сюда ваш рабочий код) ======
 print("\n" + "=" * 70)
-print("4. НАСТРОЙКА БОТА")
+print("⚙️  SETTING UP BOT FUNCTIONS")
 print("=" * 70)
 
+# Файл для данных
 DATA_FILE = "user_data.json"
 
 def load_data():
@@ -206,17 +110,20 @@ def save_data(data):
         with open(DATA_FILE, 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=2)
     except Exception as e:
-        print(f"Ошибка сохранения: {e}")
+        print(f"Save error: {e}")
 
 def get_user_data(user_id):
+    """Получить данные пользователя"""
     data = load_data()
     return data.get(str(user_id), {"name": "", "tastes": []})
 
 def save_user_data(user_id, user_data):
+    """Сохранить данные пользователя"""
     data = load_data()
     data[str(user_id)] = user_data
     save_data(data)
 
+# Обработчики бота
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Команда /start"""
     user = update.effective_user
@@ -292,44 +199,41 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ====== 5. ЗАПУСК TELEGRAM БОТА ======
 print("\n" + "=" * 70)
-print("5. ЗАПУСК TELEGRAM БОТА")
+print("🚀 STARTING TELEGRAM BOT")
 print("=" * 70)
 
 def main():
-    print("Создаю Telegram приложение...")
+    print("Initializing Telegram bot...")
     
     try:
+        # Создаем приложение
         telegram_app = Application.builder().token(TOKEN).build()
+        
+        # Добавляем обработчики
         telegram_app.add_handler(CommandHandler("start", start))
         telegram_app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
         
-        print("✅ Telegram бот настроен!")
         print("\n" + "=" * 70)
-        print("🎉 БОТ УСПЕШНО ЗАПУЩЕН!")
+        print("🎉 BOT STARTED SUCCESSFULLY!")
         print("=" * 70)
-        print("📱 Напишите в Telegram: /start")
-        print("🌐 Healthcheck: /health")
-        print("⏰ Время запуска:", datetime.now().strftime("%H:%M:%S"))
+        print("📱 Open Telegram and write: /start")
+        print("🌐 Healthcheck: /health (already working)")
+        print(f"⏰ Start time: {datetime.now().strftime('%H:%M:%S')}")
         print("=" * 70)
         
         # Запускаем бота
-        telegram_app.run_polling(drop_pending_updates=True, timeout=30)
+        telegram_app.run_polling(drop_pending_updates=True)
         
     except Exception as e:
-        print(f"❌ Ошибка Telegram бота: {type(e).__name__}")
-        print(f"Сообщение: {e}")
+        print(f"❌ Telegram bot error: {type(e).__name__}")
+        print(f"Message: {e}")
         import traceback
         traceback.print_exc()
-        
-        # Ждем чтобы увидеть ошибку
-        print("\n⏳ Жду 30 секунд...")
-        time.sleep(30)
 
 if __name__ == '__main__':
+    # Настройка логирования
     logging.basicConfig(
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         level=logging.INFO
     )
     main()
-
-
