@@ -1,0 +1,2 @@
+worker: python hookah_bot.py
+
